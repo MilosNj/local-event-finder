@@ -178,13 +178,11 @@ npm run test:e2e
 
 ---
 
-## 📸 Screenshots (placeholders)
+## 📸 Screenshots
 
-```
-/public/screenshots/home.png
-/public/screenshots/detail.png
-/public/screenshots/map.png
-```
+<img width="1440" height="788" alt="image" src="https://github.com/user-attachments/assets/e47dc6da-6252-4050-96f9-19151e440b57" />
+<img width="1440" height="790" alt="image" src="https://github.com/user-attachments/assets/f8bdcd91-ed75-4332-92c8-062b9e799408" />
+<img width="1440" height="790" alt="image" src="https://github.com/user-attachments/assets/f8db2d62-8b20-457d-9b41-6a4a4a4c17f8" />
 
 ---
 
