@@ -221,6 +221,8 @@ If you want to extend this project locally:
 
 ## 🔒 License
 
-MIT © 2025 Milos Njegovanovic
+This project is licensed under the [MIT License](./LICENSE).
+
+© 2025 Milos Njegovanovic
 
 ---
