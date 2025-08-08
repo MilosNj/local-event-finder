@@ -5,9 +5,10 @@ import { HydrateClient, api } from "~/trpc/server";
 export default async function CityEventsPage({
   params,
 }: {
-  params: { city: string };
+  params: Promise<{ city: string }>;
 }) {
-  const city = decodeURIComponent(params.city);
+  const { city: cityParam } = await params;
+  const city = decodeURIComponent(cityParam);
   void api.events.list.prefetch({ city });
   const events = await api.events.list({ city, limit: 30 });
 

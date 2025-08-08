@@ -86,6 +86,13 @@ export const eventsRouter = createTRPCRouter({
       return MOCK_EVENTS.find((e) => e.slug === input.slug) ?? null;
     }),
 
+  bySlugs: publicProcedure
+    .input(z.object({ slugs: z.array(z.string().min(1)).max(100) }))
+    .query(async ({ input }) => {
+      const set = new Set(input.slugs);
+      return MOCK_EVENTS.filter((e) => set.has(e.slug));
+    }),
+
   cities: createTRPCRouter({
     list: publicProcedure.query(async () => {
       return Array.from(new Set(MOCK_EVENTS.map((e) => e.city)));
