@@ -1,11 +1,6 @@
 import { api, HydrateClient } from "~/trpc/server";
 import InfiniteEventsList from "../components/InfiniteEventsList";
 
-export const revalidate = 60; // Revalidate home page data every 60s (adjust as needed)
-// export const dynamic = "force-dynamic"; // <-- use this instead if you never want static caching
-
-// date formatting handled inside InfiniteEventsList
-
 export default async function Home() {
   // Prefetch first page of infinite list
   void api.events.listInfinite.prefetch({ limit: 12 });

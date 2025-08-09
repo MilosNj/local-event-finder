@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { HydrateClient, api } from "~/trpc/server";
-import PaginationControls from "../../../components/PaginationControls"; // fallback to relative path for compatibility if path alias not picked up
+import PaginationControls from "../../../components/PaginationControls";
 
 function formatDate(dt: Date | string) {
   const d = typeof dt === "string" ? new Date(dt) : dt;
