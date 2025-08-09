@@ -26,6 +26,11 @@ export default function FavoritesPage() {
     { enabled: slugs.length > 0 },
   );
 
+  // Narrow any potential undefined entries defensively (tRPC typing + runtime safety)
+  const safeEvents = (events ?? []).filter(
+    (e): e is NonNullable<typeof e> => e !== undefined && e !== null,
+  );
+
   return (
     <main className="mx-auto max-w-5xl px-4 py-10">
       <div className="mb-6">
@@ -41,9 +46,9 @@ export default function FavoritesPage() {
         <p className="text-gray-600">No favorites yet.</p>
       ) : isLoading ? (
         <p className="text-gray-600">Loading…</p>
-      ) : events && events.length > 0 ? (
+      ) : safeEvents.length > 0 ? (
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {events.map((e) => (
+          {safeEvents.map((e) => (
             <Link
               key={e.id}
               href={`/events/${encodeURIComponent(e.city.toLowerCase())}/${e.slug}`}
