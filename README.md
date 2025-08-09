@@ -14,7 +14,11 @@ A **SEO‑friendly, responsive web app** built with the **T3 Stack** to help use
 
 ## 📸 Screenshots
 
-<img width="1294" height="771" alt="image" src="https://github.com/user-attachments/assets/6d3f945a-85a9-479a-819c-f0d0ba973adf" />
+<img width="1235" height="787" alt="image" src="https://github.com/user-attachments/assets/a0b556e7-3445-4186-9de1-e6d4591a5856" />
+<img width="1205" height="786" alt="image" src="https://github.com/user-attachments/assets/19ffe331-4084-4e35-bab7-3938acb3b42b" />
+<img width="1167" height="788" alt="image" src="https://github.com/user-attachments/assets/88d7749f-e8e1-4265-aad2-a1d158462346" />
+<img width="1241" height="789" alt="image" src="https://github.com/user-attachments/assets/167e63a0-2947-4a8e-ac73-649abc99c4be" />
+
 
 [![Demo](img/Screen_Recording.gif)](video/Screen-Recording.mov)
 
