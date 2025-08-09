@@ -3,16 +3,16 @@
  * Moved under src/server/trpc per the suggested project structure.
  */
 import { initTRPC } from "@trpc/server";
+import type { PrismaClient } from "@prisma/client";
 import superjson from "superjson";
 import { ZodError } from "zod";
 
 import { db } from "~/server/db";
 
-export const createTRPCContext = async (opts: { headers: Headers }) => {
-  return {
-    db,
-    ...opts,
-  };
+export const createTRPCContext = async (opts: {
+  headers: Headers;
+}): Promise<{ db: PrismaClient; headers: Headers }> => {
+  return { db, headers: opts.headers };
 };
 
 const t = initTRPC.context<typeof createTRPCContext>().create({

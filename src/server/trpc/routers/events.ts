@@ -1,65 +1,6 @@
+/* eslint-disable @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-return */
 import { z } from "zod";
 import { createTRPCRouter, publicProcedure } from "~/server/trpc/trpc";
-
-type MockEvent = {
-  id: string;
-  title: string;
-  slug: string;
-  city: string;
-  createdAt: Date;
-  description?: string;
-};
-
-const MOCK_EVENTS: MockEvent[] = [
-  {
-    id: "1",
-    title: "Belgrade Jazz Night",
-    slug: "belgrade-jazz-night-1",
-    city: "Belgrade",
-    createdAt: new Date(),
-    description: "An evening of smooth jazz in downtown Belgrade.",
-  },
-  {
-    id: "2",
-    title: "Novi Sad Tech Meetup",
-    slug: "novi-sad-tech-meetup-2",
-    city: "Novi Sad",
-    createdAt: new Date(),
-    description: "Monthly meetup for developers and tech enthusiasts.",
-  },
-  {
-    id: "3",
-    title: "Niš Rock Festival",
-    slug: "nis-rock-festival-3",
-    city: "Niš",
-    createdAt: new Date(),
-    description: "Local bands and headliners rock the stage!",
-  },
-  {
-    id: "4",
-    title: "Kragujevac Food Fair",
-    slug: "kragujevac-food-fair-4",
-    city: "Kragujevac",
-    createdAt: new Date(),
-    description: "Taste the best of local cuisine and street food.",
-  },
-  {
-    id: "5",
-    title: "Subotica Film Screening",
-    slug: "subotica-film-screening-5",
-    city: "Subotica",
-    createdAt: new Date(),
-    description: "Indie films from regional directors.",
-  },
-  {
-    id: "6",
-    title: "Belgrade Startup Pitch Night",
-    slug: "belgrade-startup-pitch-night-6",
-    city: "Belgrade",
-    createdAt: new Date(),
-    description: "Early-stage startups pitch to local investors.",
-  },
-];
 
 export const eventsRouter = createTRPCRouter({
   list: publicProcedure
@@ -71,31 +12,102 @@ export const eventsRouter = createTRPCRouter({
         })
         .optional(),
     )
-    .query(async ({ input }) => {
-      const filtered = input?.city
-        ? MOCK_EVENTS.filter(
-            (e) => e.city.toLowerCase() === input.city!.toLowerCase(),
-          )
-        : MOCK_EVENTS;
-      return filtered.slice(0, input?.limit ?? 20);
+    .query(async ({ ctx, input }) => {
+      const { db } = ctx;
+      const limit = input?.limit ?? 20;
+      const where = input?.city
+        ? { city: { equals: input.city, mode: "insensitive" as const } }
+        : {};
+      const events: Array<{
+        id: number;
+        title: string;
+        slug: string;
+        city: string;
+        description: string | null;
+        category: string;
+        imageUrl: string | null;
+        startsAt: Date;
+      }> = await db.event.findMany({
+        where,
+        orderBy: { startsAt: "asc" },
+        take: limit,
+        select: {
+          id: true,
+          title: true,
+          slug: true,
+          city: true,
+          description: true,
+          category: true,
+          imageUrl: true,
+          startsAt: true,
+        },
+      });
+      return events;
     }),
 
   bySlug: publicProcedure
     .input(z.object({ slug: z.string().min(1) }))
-    .query(async ({ input }) => {
-      return MOCK_EVENTS.find((e) => e.slug === input.slug) ?? null;
+    .query(async ({ ctx, input }) => {
+      const { db } = ctx;
+      return db.event.findUnique({
+        where: { slug: input.slug },
+        select: {
+          id: true,
+          title: true,
+          slug: true,
+          city: true,
+          description: true,
+          category: true,
+          imageUrl: true,
+          startsAt: true,
+          endsAt: true,
+          venue: { select: { name: true, city: true } },
+        },
+      });
     }),
 
   bySlugs: publicProcedure
     .input(z.object({ slugs: z.array(z.string().min(1)).max(100) }))
-    .query(async ({ input }) => {
-      const set = new Set(input.slugs);
-      return MOCK_EVENTS.filter((e) => set.has(e.slug));
+    .query(async ({ ctx, input }) => {
+      const { db } = ctx;
+      const events: Array<{
+        id: number;
+        title: string;
+        slug: string;
+        city: string;
+        description: string | null;
+        category: string;
+        imageUrl: string | null;
+        startsAt: Date;
+      }> = await db.event.findMany({
+        where: { slug: { in: input.slugs } },
+        select: {
+          id: true,
+          title: true,
+          slug: true,
+          city: true,
+          description: true,
+          category: true,
+          imageUrl: true,
+          startsAt: true,
+        },
+      });
+      // preserve incoming order of slugs
+      const bySlug = new Map<string, (typeof events)[number]>(
+        events.map((e) => [e.slug, e]),
+      );
+      return input.slugs.map((s) => bySlug.get(s)).filter(Boolean);
     }),
 
   cities: createTRPCRouter({
-    list: publicProcedure.query(async () => {
-      return Array.from(new Set(MOCK_EVENTS.map((e) => e.city)));
+    list: publicProcedure.query(async ({ ctx }) => {
+      const { db } = ctx;
+      const cities: Array<{ city: string }> = await db.event.findMany({
+        distinct: ["city"],
+        select: { city: true },
+        orderBy: { city: "asc" },
+      });
+      return cities.map((c) => c.city);
     }),
   }),
 });

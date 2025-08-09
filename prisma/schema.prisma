@@ -1,6 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
     provider = "prisma-client-js"
 }
@@ -10,11 +7,35 @@ datasource db {
     url      = env("DATABASE_URL")
 }
 
-model Post {
+model Venue {
     id        Int      @id @default(autoincrement())
     name      String
+    city      String
+    address   String?
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
+    events    Event[]
 
-    @@index([name])
+    @@unique([name, city])
+    @@index([city])
+}
+
+model Event {
+    id          Int       @id @default(autoincrement())
+    title       String
+    slug        String    @unique
+    description String?
+    category    String
+    city        String
+    imageUrl    String?
+    startsAt    DateTime
+    endsAt      DateTime?
+    venueId     Int
+    venue       Venue     @relation(fields: [venueId], references: [id], onDelete: Cascade)
+    createdAt   DateTime  @default(now())
+    updatedAt   DateTime  @updatedAt
+
+    @@index([city])
+    @@index([category])
+    @@index([startsAt])
 }

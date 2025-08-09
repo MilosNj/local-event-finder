@@ -2,6 +2,16 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { HydrateClient, api } from "~/trpc/server";
 
+function formatDate(dt: Date | string) {
+  const d = typeof dt === "string" ? new Date(dt) : dt;
+  return d.toLocaleString(undefined, {
+    month: "short",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+}
+
 export default async function CityEventsPage({
   params,
 }: {
@@ -23,10 +33,27 @@ export default async function CityEventsPage({
             <Link
               key={e.id}
               href={`/events/${encodeURIComponent(city.toLowerCase())}/${e.slug}`}
-              className="rounded-lg border bg-white p-4 shadow-sm hover:shadow-md"
+              className="group overflow-hidden rounded-lg border bg-white shadow-sm hover:shadow-md"
             >
-              <h3 className="font-semibold">{e.title}</h3>
-              <p className="text-sm text-gray-500">{e.city}</p>
+              {e.imageUrl && (
+                <div className="h-40 w-full overflow-hidden bg-gray-100">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={e.imageUrl}
+                    alt={e.title}
+                    className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                    loading="lazy"
+                  />
+                </div>
+              )}
+              <div className="p-4">
+                <h3 className="mb-1 line-clamp-1 font-semibold">{e.title}</h3>
+                <p className="text-xs text-gray-500">
+                  <span>{e.city}</span>
+                  {" • "}
+                  <span>{formatDate(e.startsAt)}</span>
+                </p>
+              </div>
             </Link>
           ))}
         </div>
