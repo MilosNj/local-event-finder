@@ -15,9 +15,7 @@ export default async function Home() {
     <HydrateClient>
       <main className="min-h-screen bg-gray-50 text-gray-900">
         <section className="mx-auto max-w-5xl px-4 py-10">
-          <h1 className="mb-6 text-3xl font-bold">
-            Browse local events and save your favorites.
-          </h1>
+          <h1 className="mb-6 text-3xl font-bold">Local Event Finder</h1>
           <p className="mb-8 text-gray-600">
             Discover concerts, meetups, and festivals near you.
           </p>
