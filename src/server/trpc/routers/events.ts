@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-return */
 import { z } from "zod";
 import { createTRPCRouter, publicProcedure } from "~/server/trpc/trpc";
 
@@ -9,12 +8,14 @@ export const eventsRouter = createTRPCRouter({
         .object({
           city: z.string().optional(),
           limit: z.number().min(1).max(50).default(20),
+          page: z.number().min(1).default(1).optional(),
         })
         .optional(),
     )
     .query(async ({ ctx, input }) => {
       const { db } = ctx;
       const limit = input?.limit ?? 20;
+      const page = input?.page ?? 1;
       const where = input?.city
         ? { city: { equals: input.city, mode: "insensitive" as const } }
         : {};
@@ -30,6 +31,7 @@ export const eventsRouter = createTRPCRouter({
       }> = await db.event.findMany({
         where,
         orderBy: { startsAt: "asc" },
+        skip: (page - 1) * limit,
         take: limit,
         select: {
           id: true,
@@ -43,6 +45,83 @@ export const eventsRouter = createTRPCRouter({
         },
       });
       return events;
+    }),
+  count: publicProcedure
+    .input(
+      z
+        .object({
+          city: z.string().optional(),
+        })
+        .optional(),
+    )
+    .query(async ({ ctx, input }) => {
+      const { db } = ctx;
+      const where = input?.city
+        ? { city: { equals: input.city, mode: "insensitive" as const } }
+        : {};
+      const total = await db.event.count({ where });
+      return total;
+    }),
+  listInfinite: publicProcedure
+    .input(
+      z
+        .object({
+          city: z.string().optional(),
+          limit: z.number().min(1).max(50).default(12),
+          cursor: z
+            .object({
+              startsAt: z.string(),
+              id: z.number(),
+            })
+            .optional(),
+        })
+        .optional(),
+    )
+    .query(async ({ ctx, input }) => {
+      const { db } = ctx;
+      const limit = input?.limit ?? 12;
+      const whereBase = input?.city
+        ? { city: { equals: input.city, mode: "insensitive" as const } }
+        : {};
+      const cursorFilter = input?.cursor
+        ? {
+            OR: [
+              { startsAt: { gt: new Date(input.cursor.startsAt) } },
+              {
+                AND: [
+                  { startsAt: { equals: new Date(input.cursor.startsAt) } },
+                  { id: { gt: input.cursor.id } },
+                ],
+              },
+            ],
+          }
+        : {};
+      const where = { AND: [whereBase, cursorFilter] };
+
+      const rows = await db.event.findMany({
+        where,
+        orderBy: [{ startsAt: "asc" }, { id: "asc" }],
+        take: limit + 1, // fetch one extra to determine next cursor
+        select: {
+          id: true,
+          title: true,
+          slug: true,
+          city: true,
+          description: true,
+          category: true,
+          imageUrl: true,
+          startsAt: true,
+        },
+      });
+
+      let nextCursor: { startsAt: string; id: number } | undefined = undefined;
+      if (rows.length > limit) {
+        const next = rows.pop();
+        if (next)
+          nextCursor = { startsAt: next.startsAt.toISOString(), id: next.id };
+      }
+
+      return { items: rows, nextCursor };
     }),
 
   bySlug: publicProcedure

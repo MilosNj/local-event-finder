@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { HydrateClient, api } from "~/trpc/server";
+import PaginationControls from "../../../components/PaginationControls"; // fallback to relative path for compatibility if path alias not picked up
 
 function formatDate(dt: Date | string) {
   const d = typeof dt === "string" ? new Date(dt) : dt;
@@ -14,13 +15,22 @@ function formatDate(dt: Date | string) {
 
 export default async function CityEventsPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ city: string }>;
+  searchParams?: Promise<{ page?: string }>;
 }) {
   const { city: cityParam } = await params;
+  const { page: pageParam } = (await searchParams) ?? {};
   const city = decodeURIComponent(cityParam);
-  void api.events.list.prefetch({ city });
-  const events = await api.events.list({ city, limit: 30 });
+  const page = Math.max(1, Number(pageParam) || 1);
+  const limit = 30;
+  void api.events.list.prefetch({ city, page, limit });
+  const [events, total] = await Promise.all([
+    api.events.list({ city, page, limit }),
+    api.events.count({ city }),
+  ]);
+  const totalPages = Math.max(1, Math.ceil(total / limit));
 
   if (!events) notFound();
 
@@ -56,6 +66,9 @@ export default async function CityEventsPage({
               </div>
             </Link>
           ))}
+        </div>
+        <div className="mt-8 flex justify-center">
+          <PaginationControls currentPage={page} totalPages={totalPages} />
         </div>
       </main>
     </HydrateClient>
