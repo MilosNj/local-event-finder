@@ -184,7 +184,7 @@ npm run test:e2e
 <img width="1440" height="790" alt="image" src="https://github.com/user-attachments/assets/f8bdcd91-ed75-4332-92c8-062b9e799408" />
 <img width="1440" height="790" alt="image" src="https://github.com/user-attachments/assets/f8db2d62-8b20-457d-9b41-6a4a4a4c17f8" />
 
-![Demo](img/Screen_Recording.gif)
+[![Demo](img/Screen_Recording.gif)](video/Screen-Recording.mov)
 
 ---
 
