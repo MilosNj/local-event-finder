@@ -186,6 +186,8 @@ npm run test:e2e
 
 [![Demo](img/Screen_Recording.gif)](video/Screen-Recording.mov)
 
+- Click on the GIF to download the raw MOV video file.
+
 ---
 
 ## 🗺 Roadmap / Next steps
